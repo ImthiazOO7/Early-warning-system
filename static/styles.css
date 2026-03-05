@@ -1,0 +1,432 @@
+/* ========= THEME VARIABLES ========= */
+:root {
+    /* Light mode values */
+    --bg-color: #e5e7ff;
+    --bg-gradient: radial-gradient(circle at top, #e0f2fe, #e5e7ff 55%, #e5e7eb 100%);
+    --text-color: #0f172a;
+    --muted-text: #6b7280;
+    --card-bg: #ffffffee;
+    --navbar-bg: #f9fafb;
+    --border-color: #cbd5e1;
+    --primary-gradient: linear-gradient(135deg,#6366f1,#0ea5e9);
+    --table-header-bg: #e0e7ff;
+    --table-row-odd: #f9fafb;
+    --table-row-even: #eef2ff;
+}
+
+/* Dark mode overrides */
+body.dark {
+    --bg-color: #020617;
+    --bg-gradient: radial-gradient(circle at top, #1f2937, #020617 70%);
+    --text-color: #e5e7eb;
+    --muted-text: #9ca3af;
+    --card-bg: rgba(15,23,42,0.96);
+    --navbar-bg: radial-gradient(circle at top left,#111827,#020617);
+    --border-color: rgba(148,163,184,0.4);
+    --primary-gradient: linear-gradient(135deg,#3b82f6,#8b5cf6);
+    --table-header-bg: #111827;
+    --table-row-odd: rgba(15,23,42,0.96);
+    --table-row-even: rgba(17,24,39,0.96);
+}
+
+/* ========= GLOBAL ========= */
+body {
+    background: var(--bg-gradient) !important;
+    color: var(--text-color) !important;
+    font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    overflow-x: hidden;
+}
+
+a { text-decoration: none; }
+
+/* ========= NAVBAR ========= */
+.navbar {
+    background: var(--navbar-bg) !important;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.navbar-brand {
+    font-weight: 600;
+    letter-spacing: .04em;
+    font-size: .9rem;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+}
+
+.navbar-brand img {
+    height: 52px;
+    width: 52px;
+    border-radius: 999px;
+    border: 2px solid rgba(248,250,252,0.9);
+    background: #fff;
+}
+
+
+.navbar-brand span {
+    display: block;
+}
+
+/* ========= TEXT ========= */
+.brand-title {
+    font-size: .85rem;
+    color: #38bdf8;
+    text-transform: uppercase;
+    letter-spacing: .18em;
+}
+
+.main-heading {
+    font-size: 2.1rem;
+    font-weight: 700;
+    color: var(--text-color);
+}
+
+.sub-text { color: var(--muted-text); }
+
+.footer-text {
+    font-size: .8rem;
+    color: var(--muted-text);
+}
+
+/* ========= LAYOUT ========= */
+.hero {
+    min-height: calc(100vh - 64px);
+    display: flex;
+    align-items: center;
+}
+
+.page-wrapper {
+    padding-top: 1.5rem;
+    padding-bottom: 2rem;
+}
+
+/* ========= CARDS ========= */
+.card-glass {
+    background: var(--card-bg) !important;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 18px 40px rgba(15,23,42,0.15);
+    backdrop-filter: blur(14px);
+    transition: transform .25s ease, box-shadow .25s ease;
+}
+
+body.dark .card-glass {
+    box-shadow: 0 22px 48px rgba(15,23,42,0.9);
+}
+
+.card-glass:hover {
+    transform: translateY(-3px);
+}
+
+/* ========= BUTTONS ========= */
+.btn-primary-custom {
+    background: var(--primary-gradient);
+    border: none;
+    color: #f9fafb;
+    font-weight: 600;
+    box-shadow: 0 12px 30px rgba(129,140,248,0.35);
+    transition: all .2s ease;
+}
+
+.btn-primary-custom:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+}
+
+.btn-outline-custom {
+    border: 1px solid #38bdf8;
+    color: #0f172a;
+    font-weight: 500;
+}
+
+body.dark .btn-outline-custom {
+    color: #e5e7eb;
+}
+
+.btn-outline-custom:hover {
+    background: #0ea5e9;
+    color: #020617;
+}
+
+.btn-outline-danger {
+    border-color: #ef4444 !important;
+}
+
+/* ========= RISK SUMMARY ========= */
+.risk-safe {
+    background: rgba(34,197,94,0.12);
+    border-radius: 16px;
+    border: 1px solid rgba(34,197,94,0.6);
+}
+.risk-warning {
+    background: rgba(234,179,8,0.14);
+    border-radius: 16px;
+    border: 1px solid rgba(234,179,8,0.75);
+}
+.risk-critical {
+    background: rgba(248,113,113,0.16);
+    border-radius: 16px;
+    border: 1px solid rgba(248,113,113,0.85);
+}
+
+/* ========= TABLE ========= */
+table.dataframe {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: .5rem;
+    border-radius: 14px;
+    overflow: hidden;
+    font-size: .8rem;
+}
+
+table.dataframe th,
+table.dataframe td {
+    padding: 8px 10px;
+    border: 1px solid rgba(148,163,184,0.4);
+}
+
+table.dataframe th {
+    background: var(--table-header-bg);
+}
+
+table.dataframe tbody tr:nth-child(odd) {
+    background: var(--table-row-odd);
+}
+
+table.dataframe tbody tr:nth-child(even) {
+    background: var(--table-row-even);
+}
+
+table.dataframe tbody tr:hover {
+    background: rgba(129,140,248,0.2);
+}
+
+/* ========= FORMS ========= */
+.form-control,
+.form-control:focus {
+    background-color: #f9fafb;
+    border-color: var(--border-color);
+    color: var(--text-color);
+}
+/* ======== DARK MODE VISIBILITY FIXES ======== */
+
+/* Make table text light in dark mode */
+body.dark table.dataframe th,
+body.dark table.dataframe td {
+    color: #e5e7eb !important;
+}
+
+/* Make “Detailed Student-wise Risk Table” heading + helper text brighter */
+body.dark h5,
+body.dark .text-secondary {
+    color: #d1d5db !important;
+}
+
+/* Risk summary cards text + numbers */
+body.dark .risk-safe,
+body.dark .risk-warning,
+body.dark .risk-critical {
+    color: #e5e7eb !important;
+}
+
+/* Just to be sure, the numbers (h4) inside those cards are bright */
+body.dark .risk-safe .h4,
+body.dark .risk-warning .h4,
+body.dark .risk-critical .h4 {
+    color: #f9fafb !important;
+}
+
+body.dark .form-control,
+body.dark .form-control:focus {
+    background-color: #020617;
+    color: #e5e7eb;
+}
+
+.form-control::file-selector-button {
+    background: #e5e7eb;
+    border-right: 1px solid var(--border-color);
+}
+body.dark .form-control::file-selector-button {
+    background: #111827;
+    color: #e5e7eb;
+}
+
+/* ===== CHART CANVAS ===== */
+body:not(.dark) canvas {
+    background: #e5e7ff;
+    border-radius: 14px;
+    padding: 6px;
+}
+
+body.dark canvas {
+    background: #020617;
+    border-radius: 14px;
+    padding: 6px;
+}
+
+
+/* LOGIN helper */
+.login-hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+}
+/* ===== DARK MODE FIXES FOR TABLE ===== */
+body.dark table.dataframe {
+    background-color: #020617 !important;
+}
+
+body.dark table.dataframe th,
+body.dark table.dataframe td {
+    background-color: #020617 !important;
+    color: #e5e7eb !important;
+    border-color: #1f2937 !important;
+}
+/* Navbar text colours */
+.navbar-brand span {
+    color: #0f172a;  /* light mode */
+}
+
+body.dark .navbar-brand span {
+    color: #e5e7eb;  /* dark mode */
+}
+
+body.dark .navbar-brand small {
+    color: #9ca3af;
+}
+/* --- Login page safety overrides --- */
+.login-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-card-fixed {
+    max-width: 380px;
+    width: 100%;
+}
+/* ----- Responsive results table ----- */
+.results-table-wrapper {
+  margin-top: 8px;
+}
+
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 12px;
+  padding: 8px;
+}
+
+/* any table inside scroll area */
+.table-scroll table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+/* sticky header */
+.table-scroll th {
+  position: sticky;
+  top: 0;
+  background: rgba(10,14,20,0.95);
+  backdrop-filter: blur(3px);
+  z-index: 5;
+  color: #cbd5e1;
+  font-weight: 600;
+  padding: 10px;
+}
+
+/* cells */
+.table-scroll td, .table-scroll th {
+  padding: 10px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  color: #e6eef8;
+  vertical-align: middle;
+}
+
+/* ✅ allow full text, wrapped to next line */
+.table-scroll td {
+  white-space: normal;       /* allow multiple words per line */
+  overflow: visible;
+  text-overflow: clip;
+  word-break: normal;        /* keep full words, don't break letters */
+  line-height: 1.4;          /* better readability */
+  max-width: 240px;          /* keeps columns balanced */
+}
+/* wider space for long text columns */
+.table-scroll td:nth-last-child(1),
+.table-scroll td:nth-last-child(2) {
+  max-width: 300px;  /* adjust as needed */
+}
+
+
+/* for columns that should wrap */
+.table-scroll td.wrap-col {
+  white-space: normal;
+  overflow: visible;
+  word-break: break-word;
+  line-height: 1.3;
+}
+table {
+  font-size: 0.85rem;
+  table-layout: fixed;
+}
+
+td, th {
+  word-wrap: break-word;
+  white-space: normal;
+  text-align: center;
+  padding: 8px;
+}
+
+th {
+  background: rgba(255,255,255,0.08);
+  font-weight: bold;
+}
+
+td {
+  background: rgba(255,255,255,0.05);
+}
+/* ----- Results table readability ----- */
+table.dataframe {
+    width: 100%;
+    table-layout: auto;          /* let columns size naturally */
+}
+
+table.dataframe th,
+table.dataframe td {
+    white-space: normal !important;  /* allow multi-line text */
+    word-break: normal !important;   /* don't break in middle of words */
+}
+/* ========== Smooth Horizontal Scroll for Results Table ========== */
+.table-scroll-container {
+    overflow-x: auto;        /* enable horizontal scrollbar */
+    overflow-y: hidden;
+    white-space: nowrap;     /* prevent columns from stacking */
+    padding-bottom: 10px;
+    scrollbar-color: #7f8cff #1e2130; /* scrollbar color */
+    scrollbar-width: thin;
+}
+
+/* prevent words from shattering */
+.table-scroll-container table {
+    table-layout: auto;
+}
+
+.table-scroll-container td,
+.table-scroll-container th {
+    white-space: normal;     /* allow wrapping inside the same cell */
+    word-break: break-word;  /* break long sentences at word boundaries */
+}
+.table-scroll-container::-webkit-scrollbar {
+    height: 10px;
+}
+.table-scroll-container::-webkit-scrollbar-thumb {
+    background: #6a75ff;
+    border-radius: 10px;
+}
+
+
+

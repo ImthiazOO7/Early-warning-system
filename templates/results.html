@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // 1) Find the table
+  const table =
+      document.querySelector('.table-scroll-container table')
+      || document.querySelector('table');
+  if (!table) return;
+
+  const headerCells = Array.from(table.querySelectorAll('thead th'));
+  const rows = Array.from(table.querySelectorAll('tbody tr'));
+  const modalEl = document.getElementById('studentModal');
+  const modalBody = document.getElementById('studentModalBody');
+  if (!modalEl || !modalBody) return;
+
+  const bsModal = new bootstrap.Modal(modalEl);
+
+  // 2) Attach click handler to each row
+  rows.forEach(row => {
+    row.style.cursor = 'pointer';
+    row.addEventListener('click', () => {
+      const cells = Array.from(row.querySelectorAll('td'));
+      let html = "<table class='table table-dark table-bordered mb-0'>";
+      headerCells.forEach((th, i) => {
+        const label = th.textContent.trim();
+        const value = cells[i] ? cells[i].textContent.trim() : '';
+        html += `<tr><th style="width: 30%;">${label}</th><td>${value}</td></tr>`;
+      });
+      html += "</table>";
+      modalBody.innerHTML = html;
+      bsModal.show();
+    });
+  });
+});
+
+
+</script>
+
+    <style>
+  /* Outer wrapper for the results table */
+  .results-table-wrapper {
+    margin-top: 1rem;
+  }
+
+  /* This div will provide horizontal scroll */
+  .table-scroll {
+    overflow-x: auto;      /* show horizontal scrollbar if needed */
+    overflow-y: visible;
+    max-width: 100%;
+  }
+
+  /* Make sure table is wide enough so scrolling actually happens */
+  .table-scroll table {
+    min-width: 1200px;     /* you can increase this if needed */
+  }
+
+  /* Header cells: keep text on one line */
+  .results-table-wrapper th {
+    white-space: nowrap;
+  }
+
+  /* Data cells: wrap nicely instead of breaking weirdly */
+  .results-table-wrapper td {
+    white-space: normal;
+    word-wrap: break-word;
+  }
+</style>
+
+<style>
+.table-scroll-container {
+  overflow-x: auto;
+  overflow-y: visible;
+  max-width: 100%;
+  padding-bottom: 8px;
+}
+
+.table-scroll-container table {
+  min-width: 1400px;
+}
+
+.table-scroll-container th {
+  white-space: nowrap;
+}
+
+.table-scroll-container td {
+  white-space: normal;
+  word-wrap: break-word;
+}
+</style>
+
+
+</head>
+<body>
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{{ url_for('index') }}">
+      <img src="{{ url_for('static', filename='jmc_logo.png') }}" alt="Jamal Mohamed College">
+      <span>
+        Jamal Mohamed College<br>
+        <small style="font-size:0.7rem;opacity:0.8;">
+          Student Early Warning System
+        </small>
+      </span>
+    </a>
+
+    <div class="d-flex align-items-center gap-2">
+      <button id="themeToggle" class="btn btn-sm btn-outline-custom">
+        🌙 Dark Mode
+      </button>
+      <span class="text-secondary" style="font-size:0.85rem;">
+        {{ user.username }} ({{ user.role }})
+      </span>
+      <a href="{{ url_for('history') }}" class="btn btn-outline-custom btn-sm">History</a>
+      <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm ms-1">Logout</a>
+    </div>
+  </div>
+</nav>
+
+<script>
+  // Apply saved theme on page load
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark') {
+      document.body.classList.add('dark');
+  }
+
+  const toggleBtn = document.getElementById('themeToggle');
+  if (toggleBtn) {
+      function updateToggleText() {
+          if (document.body.classList.contains('dark')) {
+              toggleBtn.innerText = "☀️ Light Mode";
+          } else {
+              toggleBtn.innerText = "🌙 Dark Mode";
+          }
+      }
+      updateToggleText();
+
+      toggleBtn.addEventListener('click', () => {
+          document.body.classList.toggle('dark');
+          localStorage.setItem('theme',
+              document.body.classList.contains('dark') ? 'dark' : 'light'
+          );
+          updateToggleText();
+      });
+  }
+  
+    // === Simple client-side filter & search for the risk table ===
+    
+document.addEventListener('DOMContentLoaded', function () {
+    // 1) Find the main results table
+    //    First try inside .table-scroll-container, then any table in the card
+    let table =
+        document.querySelector('.table-scroll-container table') ||
+        document.querySelector('.card.card-glass table') ||
+        document.querySelector('table');
+
+    if (!table) return; // no table found, nothing to do
+
+    const headerRow = table.querySelector('thead tr');
+    if (!headerRow) return;
+
+    const headCells = Array.from(headerRow.children);
+    let riskIdx = -1, regIdx = -1, nameIdx = -1;
+
+    // 2) Detect the needed columns by header text
+    headCells.forEach((th, idx) => {
+        const txt = th.textContent.trim().toLowerCase().replace(/\s+/g, '');
+
+        if (txt === 'risk_level' || txt === 'risklevel') riskIdx = idx;
+        if (txt === 'reg_no' || txt === 'regno') regIdx = idx;
+        if (txt === 'name') nameIdx = idx;
+    });
+
+    // If we didn't find risk_level column, just stop
+    if (riskIdx === -1) return;
+
+    const filterSelect = document.getElementById('riskFilter');
+    const searchInput = document.getElementById('studentSearch');
+    if (!filterSelect && !searchInput) return;
+
+    const rows = Array.from(table.querySelectorAll('tbody tr'));
+
+    function applyFilters() {
+        const riskValue = (filterSelect?.value || 'all').toLowerCase();
+        const searchText = (searchInput?.value || '').trim().toLowerCase();
+
+        rows.forEach(row => {
+            const cells = row.children;
+            if (!cells.length) return;
+
+            const risk = cells[riskIdx].textContent.trim().toLowerCase();
+
+            // Build searchable string from reg_no + name
+            let searchable = '';
+            if (regIdx !== -1) searchable += ' ' + cells[regIdx].textContent.toLowerCase();
+            if (nameIdx !== -1) searchable += ' ' + cells[nameIdx].textContent.toLowerCase();
+
+            const riskMatch = (riskValue === 'all') || (risk === riskValue);
+            const textMatch = !searchText || searchable.includes(searchText);
+
+            row.style.display = (riskMatch && textMatch) ? '' : 'none';
+        });
+    }
+
+    filterSelect?.addEventListener('change', applyFilters);
+    searchInput?.addEventListener('input', applyFilters);
+});
+// Student profile popup on row click
+document.querySelectorAll("tbody tr").forEach(row => {
+    row.addEventListener("click", () => {
+        const cells = Array.from(row.children).map(td => td.innerText);
+        const headers = Array.from(document.querySelectorAll("thead th")).map(th => th.innerText);
+        let html = "<table class='table table-dark table-bordered'>";
+        for (let i = 0; i < headers.length; i++) {
+            html += `<tr><th>${headers[i]}</th><td>${cells[i]}</td></tr>`;
+        }
+        html += "</table>";
+        document.getElementById("studentModalBody").innerHTML = html;
+        new bootstrap.Modal(document.getElementById("studentModal")).show();
+    });
+});
+
+
+// 💡 AI Suggestion Summary Loader
+document.addEventListener('DOMContentLoaded', function () {
+    const btn = document.getElementById("aiSummaryBtn");
+    const box = document.getElementById("aiSummaryBox");
+
+    if (!btn || !box) return;
+
+    btn.addEventListener("click", () => {
+        btn.disabled = true;
+        btn.innerText = "Loading...";
+
+        fetch("/summary_ai")
+            .then(res => res.text())
+            .then(text => {
+                box.style.display = "block";
+                box.textContent = text;
+                btn.innerText = "💡 AI Suggestion Summary";
+                btn.disabled = false;
+            })
+            .catch(() => {
+                box.style.display = "block";
+                box.textContent = "⚠ Unable to load summary.";
+                btn.disabled = false;
+            });
+    });
+});
+
+
+
+</script>
+
+
+
+<div class="container page-wrapper">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="mb-0 text-light">{{ title }}</h3>
+            <small class="text-secondary">Risk analytics summary</small>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary btn-sm">
+                ⬅ Back
+            </a>
+            <a href="{{ url_for('download_last') }}" class="btn btn-primary-custom btn-sm">
+                ⬇ Download CSV
+            </a>
+        </div>
+    </div>
+
+    <div class="card card-glass p-3 p-md-4 mb-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-8">
+                <div class="row g-3">
+                    <div class="col-sm-4">
+                        <div class="p-3 rounded-3 risk-safe">
+                            <div class="text-xs text-success text-uppercase mb-1">Safe</div>
+                            <div class="h4 mb-0">
+                                {{ risk_counts.get('Safe', 0) }}
+                            </div>
+                            <small class="text-secondary">
+                                Students with low risk
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="p-3 rounded-3 risk-warning">
+                            <div class="text-xs text-warning text-uppercase mb-1">Warning</div>
+                            <div class="h4 mb-0">
+                                {{ risk_counts.get('Warning', 0) }}
+                            </div>
+                            <small class="text-secondary">
+                                Need monitoring & support
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="p-3 rounded-3 risk-critical">
+                            <div class="text-xs text-danger text-uppercase mb-1">Critical</div>
+                            <div class="h4 mb-0">
+                                {{ risk_counts.get('Critical', 0) }}
+                            </div>
+                            <small class="text-secondary">
+                                Immediate intervention required
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3 text-secondary" style="font-size: 0.85rem;">
+                    Total students analyzed:
+                    <span class="text-info">{{ total }}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <canvas id="riskChart" height="180"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="card card-glass p-3 p-md-4">
+  <h5 class="mb-2">Detailed Student-wise Risk Table</h5>
+  <p class="text-secondary mb-2" style="font-size: 0.8rem;">
+    Scroll horizontally if needed. Columns like
+    <code>risk_probability</code> and <code>suggested_action</code> help mentors decide
+    specific interventions.
+  </p>
+  
+  <a href="/download_report" class="btn btn-danger mb-3">⬇ Download Full PDF Report</a>
+  
+  <button id="aiSummaryBtn" class="btn btn-info mb-3">💡 AI Suggestion Summary</button>
+<pre id="aiSummaryBox" class="p-3 text-light" style="display:none; background:#1f2335; border-radius:8px;"></pre>
+
+
+
+  {% if tables %}
+    <!-- ✅ toolbar: risk filter + search -->
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+            <label for="riskFilter" class="me-2 fw-semibold">Filter by risk:</label>
+            <select id="riskFilter" class="form-select form-select-sm d-inline-block w-auto">
+                <option value="all">All</option>
+                <option value="Safe">Safe</option>
+                <option value="Warning">Warning</option>
+                <option value="Critical">Critical</option>
+            </select>
+        </div>
+        <div>
+            <label for="studentSearch" class="me-2 fw-semibold">Search:</label>
+            <input id="studentSearch" type="text"
+                   class="form-control form-control-sm d-inline-block"
+                   placeholder="Reg no or name">
+        </div>
+    </div>
+
+    {% for table in tables %}
+        <div class="table-scroll-container">
+            {{ table | safe }}
+        </div>
+    {% endfor %}
+{% else %}
+    <p class="text-muted mb-0">No student records available.</p>
+{% endif %}
+{% if critical_students %}
+<div class="card card-glass p-3 mt-4">
+    <h5>Critical Students – Behaviour / Issues Form</h5>
+    <p class="text-secondary" style="font-size: 0.85rem;">
+        These students are in <strong>Critical</strong> risk. Click “View / Fill Form”
+        to see their responses or ask them to submit reasons for their backlogs.
+    </p>
+    <div class="table-responsive">
+        <table class="table table-sm table-dark table-bordered align-middle">
+            <thead>
+                <tr>
+                    <th>Reg No</th>
+                    <th>Name</th>
+                    <th>Dept</th>
+                    <th>Semester</th>
+                    <th>Behaviour / Issues Form</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in critical_students %}
+                <tr>
+                    <td>{{ s.reg_no }}</td>
+                    <td>{{ s.name }}</td>
+                    <td>{{ s.dept }}</td>
+                    <td>{{ s.semester }}</td>
+                    <td>
+                        <a href="{{ url_for('issues_form', reg_no=s.reg_no) }}" class="btn btn-sm btn-outline-info">
+                            View / Fill Form
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+
+
+
+    </div>
+</div>
+
+<!-- Student Profile Modal -->
+<div class="modal fade" id="studentModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header">
+        <h5 class="modal-title">Student Details</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="studentModalBody">
+        <!-- filled by JS -->
+      </div>
+    </div>
+  </div>
+
+
+
+<script>
+    const safe = {{ risk_counts.get('Safe', 0) }};
+    const warning = {{ risk_counts.get('Warning', 0) }};
+    const critical = {{ risk_counts.get('Critical', 0) }};
+
+    const ctx = document.getElementById('riskChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Safe', 'Warning', 'Critical'],
+            datasets: [{
+                data: [safe, warning, critical],
+                backgroundColor: ['#22c55e', '#f59e0b', '#ef4444'],
+                borderWidth: 1,
+                borderColor: '#020617'
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    labels: { color: '#e5e7eb' }
+                },
+                title: {
+                    display: true,
+                    text: 'Risk Distribution',
+                    color: '#e5e7eb',
+                    font: { size: 14 }
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>

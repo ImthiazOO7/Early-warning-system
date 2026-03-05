@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login • Student Early Warning System</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+    <style>
+        body { margin: 0; }
+
+        /* top-left college logo + name */
+        .login-college-header {
+            position: fixed;
+            top: 18px;
+            left: 26px;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            z-index: 50;
+        }
+        .login-college-header img {
+            height: 56px;
+            width: 56px;
+            border-radius: 999px;
+            border: 2px solid rgba(248,250,252,0.95);
+            background: #ffffff;
+            box-shadow: 0 8px 18px rgba(15,23,42,0.45);
+        }
+        .login-college-main {
+            font-weight: 700;
+            font-size: 1.05rem;
+            letter-spacing: 0.04em;
+        }
+        .login-college-sub {
+            font-size: 0.75rem;
+            opacity: 0.85;
+        }
+        body.dark .login-college-main,
+        body.dark .login-college-sub {
+            color: #e5e7eb;
+        }
+
+        /* big title in center top */
+        .login-main-title {
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 10px;
+        }
+        .login-main-title h2 {
+            margin: 0;
+            font-size: 2.4rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            background: linear-gradient(90deg,#60a5fa,#c4b5fd,#60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 10px rgba(129,140,248,0.6);
+        }
+        .login-main-title p {
+            margin: 4px 0 0 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #cbd5ff;
+        }
+
+        /* center login card */
+        .login-container {
+            min-height: calc(100vh - 140px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-card {
+            max-width: 420px;
+            width: 100%;
+            background: rgba(15,23,42,0.96);
+            border-radius: 24px;
+            border: 1px solid rgba(148,163,184,0.5);
+            box-shadow: 0 24px 60px rgba(15,23,42,0.95);
+            backdrop-filter: blur(16px);
+        }
+
+        .login-card h3 {
+            color: #f9fafb;
+        }
+
+        .login-card .form-label {
+            color: #e5e7eb;
+        }
+
+        .login-card .form-control {
+            background: rgba(15,23,42,0.9);
+            border-color: rgba(148,163,184,0.7);
+            color: #e5e7eb;
+        }
+        .login-card .form-control:focus {
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 0.15rem rgba(124,58,237,0.5);
+        }
+
+        .login-btn {
+            background: linear-gradient(90deg,#7f5aff,#8ad0ff);
+            border: none;
+            color: #fff;
+            padding: 10px;
+            font-size: 1.05rem;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+        .login-btn:hover {
+            opacity: 0.95;
+        }
+
+        .small-credentials {
+            color: #cbd5f5;
+        }
+    </style>
+</head>
+<body>
+<!-- College logo + name -->
+<div class="login-college-header">
+    <img src="{{ url_for('static', filename='jmc_logo.png') }}" alt="Jamal Mohamed College">
+    <div>
+        <div class="login-college-main">Jamal Mohamed College</div>
+        <div class="login-college-sub">Student Early Warning System</div>
+    </div>
+</div>
+
+<!-- Big title -->
+<div class="login-main-title">
+    <h2>Student Early Warning System</h2>
+    <p>AI-Powered Academic Risk Analytics</p>
+</div>
+
+<!-- Centered login card (horizontal, not vertical) -->
+<div class="login-container">
+    <div class="login-card p-5">
+        <h3 class="text-center fw-bold mb-3">Sign In</h3>
+        <p class="text-center small small-credentials mb-3">
+            Admin: <code>admin / admin123</code> ·
+            Mentor: <code>mentor / mentor123</code>
+        </p>
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="alert alert-danger py-2">
+                {% for msg in messages %}
+                    {{ msg }}<br>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% endwith %}
+
+        <form method="post">
+            <div class="mb-3">
+                <label class="form-label">Username</label>
+                <input class="form-control" name="username" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input class="form-control" type="password" name="password" required>
+            </div>
+            <button class="btn login-btn w-100 mt-2" type="submit">
+                Log in
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+  // Apply saved dark/light theme on login page
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark') {
+      document.body.classList.add('dark');
+  }
+</script>
+</body>
+</html>
